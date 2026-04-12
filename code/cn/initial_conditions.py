@@ -1,7 +1,7 @@
 ## Kondisi Awal untuk Persamaan Adveksi-Difusi ##
 import numpy as np
 
-def gaussian_pulase(x, A=1.0, x0= 0.0, sigma=0.1):
+def gaussian_pulse(x, A=1.0, x0= 0.0, sigma=0.1):
     """
     Fungsi untuk menghasilkan pulsa Gaussian sebagai kondisi awal.
     

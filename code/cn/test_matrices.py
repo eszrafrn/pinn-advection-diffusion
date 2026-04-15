@@ -8,7 +8,7 @@ dt=0.01
 u=1.0
 D=0.01
 
-A, B = build_CN_matrices(Nx, dt, dx, u, D, bc_type='dirichlet')
+A, B = build_CN_matrices(Nx, dt, dx, u, D, bc_type='Dirichlet')
 assert A.shape == (Nx, Nx)
 print(A[0:3, 0:3])
 solve = solve_tridiagonal(A.diagonal(-1), A.diagonal(0), A.diagonal(1), B[:, 0])

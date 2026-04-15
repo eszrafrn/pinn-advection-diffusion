@@ -2,26 +2,31 @@
 ### A c^{n+1} = B c^{n} ###
 import numpy as np
 
-def build_CN_matrices(Nx, dt, dx, v, D, bc_type='dirichlet'):
+def build_CN_matrices(Nx, dt, dx, v, D, bc_type='Dirichlet'):
     
-    r = D * dt / (dx**2)
-    s = v * dt / (2*dx) 
+    r = D * dt / (2*dx**2)
+    s = v * dt / (4*dx) 
     A = np.zeros((Nx, Nx))
     B = np.zeros((Nx, Nx))
     for i in range(1, Nx-1):
         A[i, i] = 1 + 2*r
-        A[i, i-1] = -r + s
-        A[i, i+1] = -r - s
+        A[i, i-1] = -r - s
+        A[i, i+1] = -r + s
         B[i, i] = 1 - 2*r
-        B[i, i-1] = r - s
-        B[i, i+1] = r + s
+        B[i, i-1] = r + s
+        B[i, i+1] = r - s
     # Boundary conditions
-    if bc_type == 'dirichlet':
+    if bc_type == 'Dirichlet':
+        A[0, :] = 0
         A[0, 0] = 1
+
+        A[-1, :] = 0
         A[-1, -1] = 1
-        B[0, 0] = 1
-        B[-1, -1] = 1
-    elif bc_type == 'neumann':
+
+        B[0, :] = 0
+        B[-1, :] = 0
+        
+    elif bc_type == 'Neumann':
         # batas kiri
         A[0, 0] = 1 + 2*r
         A[0, 1] = -2*r-2*s
@@ -43,7 +48,7 @@ def solve_tridiagonal(a, b, c, d):
     d: ruas kanan (length n)
     """
     n = len(b)
-    cp = np.zeros(n-1)    #c'
+    cp = np.zeros(n)    #c'
     dp = np.zeros(n)    #d'
     x = np.zeros(n)
 
@@ -54,11 +59,12 @@ def solve_tridiagonal(a, b, c, d):
         denom = b[i] - a[i-1] * cp[i-1]
         cp[i] = c[i] / denom
         dp[i] = (d[i] - a[i-1] * dp[i-1]) / denom
-    #dp[n-1] = (d[n-1] - a[n-1] * dp[n-1]) / (b[n-1] - a[n-1] * cp[n-1])
+    denom = b[n-1] - a[n-2] * cp[n-2]
+    dp[n-1] = (d[n-1] - a[n-2] * dp[n-2]) / denom
 
     # Back substitution
-    x[-1] = dp[-1]
-    for i in range((n-2), -1, -1):
+    x[n-1] = dp[n-1]
+    for i in np.arange((n-2), -1, -1):
         x[i] = dp[i] - (cp[i]) * (x[i+1])
     return x
 

@@ -7,7 +7,7 @@ L = 1.0
 T = 0.5
 Nx = 100
 Nt = 100
-v = 1.0
+v = 0.25
 D = 0.01
 
 # Initial condition
@@ -16,4 +16,13 @@ BC = Dirichlet_BC(left=0.0, right=0.0)
 
 solver = CNSolver(L, T, Nx, Nt, v, D, IC, BC)
 c_final = solver.solve()
+print(c_final)
 
+import matplotlib.pyplot as plt
+plt.plot(solver.x, c_final, label='CN Solution')
+plt.xlabel('x')
+plt.ylabel('c(x, T)')
+plt.title('Concentration Profile at Final Time')
+plt.legend()
+plt.grid()
+plt.show()

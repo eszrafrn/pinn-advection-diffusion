@@ -1,6 +1,8 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import cn_matrices, initial_conditions, boundary_conditions
-
+import utils
+import os
 class CNSolver:
     def __init__(self, L, T, Nx, Nt, v, D, IC, BC):
         self.L = L
@@ -19,12 +21,12 @@ class CNSolver:
         self.t = np.linspace(0, T, Nt + 1)
 
         self.Pe = v * L / D if D != 0 else np.inf
+        self.mass_history = []
 
+        print("="*50)
         print("Initialized summary:")
-        print(f" Spatial grid: {self.Nx} points")
-        print(f" Time steps: {self.Nt}")
-        print(f" Time step size: {self.dt:.4f}")
-        print(f" Grid spacing: {self.dx:.4f}")
+        print(f"Grid: Nx={self.Nx}, Nt={self.Nt}")
+        print(f"Spacing: dx={self.dx:.6f}, dt={self.dt:.6f}")
         print(f" Péclet number: {self.Pe:.2f}")
 
     # Time stepping 
@@ -32,14 +34,17 @@ class CNSolver:
         # RHS
         rhs = B @ u
         
-        # Apply BC ke RHS
-        self.BC.apply(rhs)
+        if self.BC.type == 'Dirichlet':
+            rhs[0] = self.BC.left
+            rhs[-1] = self.BC.right
 
-        # Solve tridiagonal system
+        #solve
         u_next = cn_matrices.solve_tridiagonal(a, b_diag, c_diag, rhs)
 
-        # Enforce BC ke solusi akhir
-        self.BC.apply(u_next)
+        # Enforce BC ke solusi akhir hanya untuk dirichlet
+        if self.BC.type == 'Dirichlet':
+            u_next[0] = self.BC.left
+            u_next[-1] = self.BC.right
 
         return u_next
 
@@ -52,24 +57,51 @@ class CNSolver:
             bc_type=self.BC.type
         )
 
-        # Extract diagonals 
-        a = A.diagonal(-1)
+        # extract tridiagonal system
+        a = np.concatenate(([0], A.diagonal(-1))) # add dummy at start
         b_diag = A.diagonal(0)
-        c_diag = A.diagonal(1)
-
+        c_diag = np.concatenate((A.diagonal(1), [0]))  # add dummy at end
+        
         # Initial condition
-        u = self.IC(self.x)
-        self.BC.apply(u)
+        u = self.IC(self.x).copy()
 
-        # Save history (optional)
+        if self.BC.type == 'Dirichlet':
+            self.BC.apply(u)
+
+        initial_mass = np.trapezoid(u, dx=self.dx)
+        self.mass_history = [initial_mass]
+
+        # Save history 
         if save_history:
             self.solution_history = [u.copy()]
 
         # Time loop
-        for _ in range(self.Nt):
+        for n in range(self.Nt):
             u = self.time_step(u, a, b_diag, c_diag, B)
+            
+            # Compute and store mass
+            mass = utils.compute_mass(u, self.dx)
+            self.mass_history.append(mass)
 
             if save_history:
                 self.solution_history.append(u.copy())
 
         return u
+    
+    def plot_mass_evolution(self, save_path=None):
+        plt.figure(figsize=(8, 5))
+        plt.plot(self.t, self.mass_history, marker='o', color='royalblue', label='$M(t)$')
+        plt.axhline(y=self.mass_history[0], color='gray', linestyle='--', label='$M_0$')
+        plt.xlabel('Waktu (t)')
+        plt.ylabel('Total Massa')
+        plt.title('Evolusi Mass dalam Solusi CN')
+        plt.grid(True)
+        plt.legend()
+        
+        if save_path:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            plt.savefig(save_path, dpi=300)
+            print(f"Plot evolusi massa disimpan ke {save_path}")
+
+        plt.show()
+        plt.close()

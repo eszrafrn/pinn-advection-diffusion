@@ -26,20 +26,10 @@ class Neumann_BC:
 
         if flux_left != 0.0 or flux_right != 0.0:
             raise NotImplementedError("Hanya Neumann Homogen yang didukung")
-    
-    def apply_left(self, c, dx=None):
-        # dc/dx = 0 → (c[1] - c[0]) / dx = 0 → c[0] = c[1]
-        c[0] = c[1]
 
-    def apply_right(self, c, dx=None):
-        # dc/dx = 0 → (c[-1] - c[-2]) / dx = 0 → c[-1] = c[-2]
-        c[-1] = c[-2]
 
     def apply(self, c, dx=None):
-        if len(c) < 2:
-            raise ValueError("Array terlalu kecil untuk Neumann BC")
-        self.apply_left(c, dx)
-        self.apply_right(c, dx)
+        pass
 
     def __repr__(self):
         return f"Neumann_BC(flux_left={self.flux_left}, flux_right={self.flux_right})"

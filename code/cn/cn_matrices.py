@@ -9,12 +9,14 @@ def build_CN_matrices(Nx, dt, dx, v, D, bc_type='Dirichlet'):
     A = np.zeros((Nx, Nx))
     B = np.zeros((Nx, Nx))
     for i in range(1, Nx-1):
-        A[i, i] = 1 + 2*r
         A[i, i-1] = -r - s
+        A[i, i] = 1 + 2*r
         A[i, i+1] = -r + s
-        B[i, i] = 1 - 2*r
+
         B[i, i-1] = r + s
+        B[i, i] = 1 - 2*r
         B[i, i+1] = r - s
+
     # Boundary conditions
     if bc_type == 'Dirichlet':
         A[0, :] = 0
@@ -27,45 +29,50 @@ def build_CN_matrices(Nx, dt, dx, v, D, bc_type='Dirichlet'):
         B[-1, :] = 0
         
     elif bc_type == 'Neumann':
-        # batas kiri
+        # batas kiri (x=0)
         A[0, 0] = 1 + 2*r
-        A[0, 1] = -2*r-2*s
+        A[0, 1] = -2*r
+
         B[0, 0] = 1 - 2*r
-        B[0, 1] = 2*r + 2*s
-        # batas kanan
+        B[0, 1] = 2*r
+
+        # batas kanan (x=L)
+        A[-1, -2] = -2*r
         A[-1, -1] = 1 + 2*r
-        A[-1, -2] = -2*r+2*s
+        
+        B[-1, -2] = 2*r
         B[-1, -1] = 1 - 2*r
-        B[-1, -2] = 2*r - 2*s
+        
     return A, B
 
 def solve_tridiagonal(a, b, c, d):
     """
     Menyelesaikan sistem tridiagonal Ax = d menggunakan algoritma Thomas
-    a: diagonal bawah (length n-1)
+    a: diagonal bawah (length n, dengan a[0] tidak digunakan)
     b: diagonal utama (length n)
-    c: diagonal atas (length n-1)
+    c: diagonal atas (length n, dengan c[-1] tidak digunakan)
     d: ruas kanan (length n)
     """
     n = len(b)
-    cp = np.zeros(n)    #c'
-    dp = np.zeros(n)    #d'
-    x = np.zeros(n)
+    
+    a = np.copy(a)
+    b = np.copy(b)
+    c = np.copy(c)
+    d = np.copy(d)
 
-    # Forward sweep
-    cp[0] = c[0] / b[0]
-    dp[0] = d[0] / b[0]
-    for i in range(1, n-1):
-        denom = b[i] - a[i-1] * cp[i-1]
-        cp[i] = c[i] / denom
-        dp[i] = (d[i] - a[i-1] * dp[i-1]) / denom
-    denom = b[n-1] - a[n-2] * cp[n-2]
-    dp[n-1] = (d[n-1] - a[n-2] * dp[n-2]) / denom
+
+    # Forward elimination
+    for i in range(1, n):
+        m = a[i-1] / b[i-1]
+        b[i] = b[i] - m * c[i-1]
+        d[i] = d[i] - m * d[i-1]
 
     # Back substitution
-    x[n-1] = dp[n-1]
-    for i in np.arange((n-2), -1, -1):
-        x[i] = dp[i] - (cp[i]) * (x[i+1])
+    x = np.zeros(n)
+    x[-1] = d[-1] / b[-1]
+    for i in range(n-2, -1, -1):
+        x[i] = (d[i] - c[i] * x[i+1]) / b[i]
+
     return x
 
 

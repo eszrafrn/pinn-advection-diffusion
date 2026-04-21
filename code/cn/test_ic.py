@@ -1,9 +1,9 @@
-from initial_conditions import gaussian_pulase
+from initial_conditions import gaussian_pulse
 import numpy as np
 import matplotlib.pyplot as plt
 
 x = np.linspace(0,1,100)
-c0 = gaussian_pulase(x, A=1.0, x0=0.5, sigma=0.1)
+c0 = gaussian_pulse(x, A=1.0, x0=0.5, sigma=0.1)
 plt.plot(x, c0)
 plt.xlabel('x')
 plt.ylabel('c')

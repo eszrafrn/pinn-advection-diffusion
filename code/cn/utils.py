@@ -2,12 +2,14 @@
 ### sebagai fungsi untuk membuat grid, perhitungan massa, dan kesalahan metrik.
 
 import numpy as np
+#from scipy.integrate import simpson
 
 def create_grid(L, Nx):
     return np.linspace(0, L, Nx)
 
 def compute_mass(c, dx):
-    return np.sum(c)*dx
+    #return simpson(y=c, dx=dx)
+    return np.trapezoid(c, dx=dx)
 
 def compute_l2_error(c_numeric, c_ref):
     num = np.sqrt(np.sum((c_numeric - c_ref) ** 2))

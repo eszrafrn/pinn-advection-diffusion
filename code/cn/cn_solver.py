@@ -27,7 +27,7 @@ class CNSolver:
         print("Initialized summary:")
         print(f"Grid: Nx={self.Nx}, Nt={self.Nt}")
         print(f"Spacing: dx={self.dx:.6f}, dt={self.dt:.6f}")
-        print(f" Péclet number: {self.Pe:.2f}")
+        print(f"Péclet number: {self.Pe:.2f}")
 
     # Time stepping 
     def time_step(self, u, a, b_diag, c_diag, B):

@@ -9,7 +9,7 @@ def create_grid(L, Nx):
 
 def compute_mass(c, dx):
     #return simpson(y=c, dx=dx)
-    return np.trapezoid(c, dx=dx)
+    return np.sum(c) * dx
 
 def compute_l2_error(c_numeric, c_ref):
     num = np.sqrt(np.sum((c_numeric - c_ref) ** 2))

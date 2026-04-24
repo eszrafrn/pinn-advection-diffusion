@@ -42,16 +42,16 @@ def build_CN_matrices(Nx, dt, dx, v, D, bc_type='Dirichlet'):
         
         B[-1, -2] = 2*r
         B[-1, -1] = 1 - 2*r
-        
+
     return A, B
 
 def solve_tridiagonal(a, b, c, d):
     """
     Menyelesaikan sistem tridiagonal Ax = d menggunakan algoritma Thomas
-    a: diagonal bawah (length n, dengan a[0] tidak digunakan)
-    b: diagonal utama (length n)
-    c: diagonal atas (length n, dengan c[-1] tidak digunakan)
-    d: ruas kanan (length n)
+    a: diagonal bawah 
+    b: diagonal utama 
+    c: diagonal atas 
+    d: ruas kanan 
     """
     n = len(b)
     
@@ -63,7 +63,7 @@ def solve_tridiagonal(a, b, c, d):
 
     # Forward elimination
     for i in range(1, n):
-        m = a[i-1] / b[i-1]
+        m = a[i] / b[i-1]
         b[i] = b[i] - m * c[i-1]
         d[i] = d[i] - m * d[i-1]
 

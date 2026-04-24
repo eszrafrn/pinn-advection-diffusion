@@ -46,12 +46,12 @@ for bc_name, bc_obj in bc_dict.items():
             continue
 
         # (Neumann) cetak info evaluasi massa
-        if bc_name == 'Neumann':
-            mass_initial = compute_mass(solver.IC(solver.x), solver.dx)
-            mass_final = compute_mass(c_final, solver.dx)
-            mass_error = compute_mass_error(mass_initial, mass_final)
-            print(f"Mass Conservation Error: {mass_error:.4e}")
-        
+        #if bc_name == 'Neumann':
+        mass_initial = compute_mass(solver.IC(solver.x), solver.dx)
+        mass_final = compute_mass(c_final, solver.dx)
+        mass_error = compute_mass_error(mass_initial, mass_final)
+        print(f"Mass Conservation Error: {mass_error:.4e}")
+    
         # Simpan
         c_exact = np.array(solver.solution_history)
         filepath = os.path.join(save_dir, f"reference_{bc_name}_Pe={pe:.2f}.npz")
@@ -64,13 +64,10 @@ for bc_name, bc_obj in bc_dict.items():
         t = solver.t
         c = np.array(solver.solution_history)
         plot_solution_evolution(x, t, c, save_path=f'figures/reference_{bc_name}_Pe={pe:.2f}_evolution.png', title=f'Evolusi Solusi CN ({bc_name} Pe={pe:.2f})')
-        if bc_name == 'Neumann':
-            plot_mass_vs_time(t, solver.mass_history, save_path=f'figures/reference_{bc_name}_Pe={pe:.2f}_mass.png', title=f'Evolusi Massa CN ({bc_name} Pe={pe:.2f})')
-        else:
-            continue
+        plot_mass_vs_time(t, solver.mass_history, save_path=f'figures/reference_{bc_name}_Pe={pe:.2f}_mass.png', title=f'Evolusi Massa CN ({bc_name} Pe={pe:.2f})')
+
 print("\n" + "="*50)
 print(f"SUMMARY: ALL {total_cases}/14 REFERENCE SOLUTIONS COMPLETE!")
-
 
 
 

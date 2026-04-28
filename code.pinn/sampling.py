@@ -54,8 +54,8 @@ def prepare_training_data(N_r = 10000, N_IC = 5000, N_BC = 1600, L=1.0, T=0.5, b
         't_r': to_tensor(t_r_np, requires_grad=True, device=device),
         'x_ic': to_tensor(x_ic_np, device=device),
         't_ic': to_tensor(t_ic_np, device=device),
-        'x_bc': to_tensor(x_bc_np, device=device),
-        't_bc': to_tensor(t_bc_np, device=device)
+        'x_bc': to_tensor(x_bc_np, device=device, requires_grad=True if bc_type == 'Neumann' else False),
+        't_bc': to_tensor(t_bc_np, device=device, requires_grad=True if bc_type == 'Neumann' else False)
     }
 
     return data

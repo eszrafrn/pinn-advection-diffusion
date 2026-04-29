@@ -1,0 +1,11 @@
+{
+    "Pe": 50.0,
+    "BC_Type": "Dirichlet",
+    "t_eval": 0.5,
+    "Global_L2_Error": 0.012479799679860086,
+    "L2_Error_at_t_final": 0.030767970840729245,
+    "L_inf_Error_at_t_final": 0.12707793712615967,
+    "Mass_CN": 0.2386558034473347,
+    "Mass_PINN": 0.23923919341704986,
+    "Mass_Error": 0.002444482645249808
+}

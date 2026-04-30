@@ -11,14 +11,14 @@ def gaussian_quadrature(n=50, L=1.0, device='cpu'):
     x_mapped = 0.5 * (x_gl + 1) * L
     w_mapped = 0.5 * w_gl * L
     
-    x_tensor = torch.tensor(x_mapped, dtype=torch.float64, device=device).unsqueeze(1)  # (n, 1)
-    w_tensor = torch.tensor(w_mapped, dtype=torch.float64, device=device).unsqueeze(1)  # (n, 1)
+    x_tensor = torch.tensor(x_mapped, dtype=torch.float32, device=device).unsqueeze(1)  # (n, 1)
+    w_tensor = torch.tensor(w_mapped, dtype=torch.float32, device=device).unsqueeze(1)  # (n, 1)
     return x_tensor, w_tensor
 
 # array waktu yang tersebar merata dari 0 hingga T
 def sample_time_points(n_t=25, T=0.5, device='cpu'):
     t = np.linspace(0, T, n_t)
-    t_tensor = torch.tensor(t, dtype=torch.float64, device=device).unsqueeze(1)  # (n_t, 1)
+    t_tensor = torch.tensor(t, dtype=torch.float32, device=device).unsqueeze(1)  # (n_t, 1)
     return t_tensor
 
 def compute_mass_penalty(model, x_quad, w_quad, t_samples, M0):

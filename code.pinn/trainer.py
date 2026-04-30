@@ -1,7 +1,11 @@
+from ast import If
+
 import torch
 import os
 from tqdm import tqdm
 from loss_function import total_loss_vanilla
+from mass_penalty_pinn import gaussian_quadrature, sample_time_points, compute_mass_penalty
+
 
 def train_adam (model, data, params, epochs=1000, lr=1e-3, save_dir='checkpoints'):
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -119,3 +123,74 @@ def train_pinn_vanilla(model, data, params, epochs_adam = 1000, epochs_lbfgs=500
     }
 
     return history_comb
+
+def train_pinn_conservative(model, data, params, epochs_adam = 1000, epochs_lbfgs=500, lr_adam=1e-3):
+    device = data['x_ic'].device
+    optimizer_adam = torch.optim.Adam(model.parameters(), lr=lr_adam)
+    
+    # setup quadrature untuk penalti massa
+    L = 1.0
+    T = 0.5
+    x_quad, w_quad = gaussian_quadrature(n=50, L=L, device=device)
+    t_samples = sample_time_points(n_t=25, T=T, device=device)
+
+    # ekstrak parameter
+    lambda_ic = params['lambda_ic']
+    lambda_bc = params['lambda_bc']
+    lambda_pde = params['lambda_pde']
+    lambda_mass = params['lambda_mass']
+    M0 = params['M0']
+
+    history = {'epoch': [], 'total_loss': [], 'L_IC': [], 'L_BC': [], 'L_PDE': [], 'L_Mass': []}
+
+    print("\n=== MEMULAI TRAINING PINN-CONSERVATIVE ===")
+    for epoch in range(epochs_adam):
+        optimizer_adam.zero_grad()
+
+        # hitung loss utama
+        total_loss, L_IC, L_BC, L_PDE = total_loss_vanilla(model, data, params)
+
+        # hitung penalti massa
+        L_Mass = compute_mass_penalty(model, x_quad, w_quad, t_samples, M0)
+
+        # total loss dengan penalti massa
+        total_loss_conservative = total_loss + (lambda_mass * L_Mass)
+
+        # backpropagation
+        total_loss_conservative.backward()
+        optimizer_adam.step()
+
+        if epoch % 100 == 0:
+            print(f"Epoch {epoch:4d} | Total Loss: {total_loss_conservative.item():.6e}, L_IC: {L_IC.item():.6e}, L_BC: {L_BC.item():.6e}, L_PDE: {L_PDE.item():.6e}, L_Mass: {L_Mass.item():.6e}")
+            
+        # simpan history
+        history['epoch'].append(epoch)
+        history['total_loss'].append(total_loss_conservative.item())
+        history['L_IC'].append(L_IC.item())
+        history['L_BC'].append(L_BC.item())
+        history['L_PDE'].append(L_PDE.item())
+        history['L_Mass'].append(L_Mass.item())
+    
+    print("\n Memulai optimasi L-BFGS untuk fine-tuning...")
+    optimizer_lbfgs = torch.optim.LBFGS(model.parameters(), lr=1.0, max_iter=epochs_lbfgs, max_eval=epochs_lbfgs*1.25, history_size=100, tolerance_grad=1e-7, tolerance_change=1e-9, line_search_fn='strong_wolfe')
+
+    def closure():
+        optimizer_lbfgs.zero_grad()
+
+        # hitung loss utama
+        total_loss, L_IC, L_BC, L_PDE = total_loss_vanilla(model, data, params)
+
+        # hitung penalti massa
+        L_Mass = compute_mass_penalty(model, x_quad, w_quad, t_samples, M0)
+
+        # total loss dengan penalti massa
+        total_loss_conservative = total_loss + (lambda_mass * L_Mass)
+
+        # backpropagation
+        total_loss_conservative.backward()
+
+        return total_loss_conservative
+
+
+    optimizer_lbfgs.step(closure)
+    return history

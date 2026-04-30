@@ -79,7 +79,7 @@ def evaluate_and_log(model_path, ref_path, pe_val):
     # save JSON log
     result_log = {
         'Pe': pe_val,
-        'BC_Type': 'Dirichlet',
+        'BC_Type': 'Neumann',
         't_eval': float(t_final),
         'Global_L2_Error': float(global_l2_error),
         'L2_Error_at_t_final': float(l2_error),
@@ -114,8 +114,8 @@ def evaluate_and_log(model_path, ref_path, pe_val):
 
 if __name__ == '__main__':
     PE_VALUE = 50.0
-    MODEL_FILE = f'models\PINN_Vanilla\PINN_VANILLA_Pe={PE_VALUE}_Dirichlet.pth'
-    REF_FILE = f'data/reference/reference_Dirichlet_Pe={PE_VALUE:.2f}.npz'
+    MODEL_FILE = f'models\PINN_Vanilla\PINN_VANILLA_Pe={PE_VALUE}_Neumann.pth'
+    REF_FILE = f'data/reference/reference_Neumann_Pe={PE_VALUE:.2f}.npz'
     if os.path.exists(REF_FILE):
         evaluate_and_log(MODEL_FILE, REF_FILE, PE_VALUE)
     else:

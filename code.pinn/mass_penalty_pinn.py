@@ -28,7 +28,7 @@ def compute_mass_penalty(model, x_quad, w_quad, t_samples, M0):
 
     for i in range(n_t):
         t_current = t_samples[i].repeat(x_quad.shape[0], 1)  # (n_quad, 1)
-        input = torch.cat([x_quad, t_current], dim=1).float()  # (n_quad, 2)
+        input = torch.cat([x_quad, t_current], dim=1)  # (n_quad, 2)
         c_pred = model(input)  # (n_quad, 1)
 
         # hitung massa total dengan integrasi numerik

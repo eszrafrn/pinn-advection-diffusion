@@ -70,7 +70,7 @@ def evaluate_and_log(model_path, ref_path, pe_val):
     mass_pinn_final = mass_pinn_history[-1]
     mass_err = mass_error(mass_pinn_final, mass_cn_final)
    
-    print(f"\n***** Evaluasi PINN Vanilla pada Bilangan Peclet {pe_val} *****")
+    print(f"\n***** Evaluasi Mass-Penalty PINN pada Bilangan Peclet {pe_val} *****")
     print(f"Global L2 Error: {global_l2_error:.6e}")
     print(f"  L2 Relative Error (t = 0.5s): {l2_error:.6e}")
     print(f"  L-infinity Error: {l_inf_error:.6e}")
@@ -89,32 +89,32 @@ def evaluate_and_log(model_path, ref_path, pe_val):
         'Mass_Error': float(mass_err)
     }
 
-    os.makedirs('results/pinn_vanilla/', exist_ok=True)
-    json_path = f'results/pinn_vanilla/pinn_vanilla_Pe={pe_val}_{result_log["BC_Type"]}.json'
+    os.makedirs('results/pinn_conservative/', exist_ok=True)
+    json_path = f'results/pinn_conservative/pinn_conservative_Pe={pe_val}_{result_log["BC_Type"]}.json'
     with open(json_path, 'w') as f:
         json.dump(result_log, f, indent=4)
     print(f"\nHasil evaluasi telah disimpan di {json_path}")
 
     # visualisasi perbandingan
 
-    os.makedirs('figures/pinn_vanilla/', exist_ok=True)
-    plot_solution_evolution(x_np.flatten(), t_eval, c_pred_evolution, save_path=f'figures/pinn_vanilla/Evolution_Pinn_vanilla_Pe={pe_val}_{result_log["BC_Type"]}.png', title=f'Evolusi Solusi PINN Vanilla (Pe={pe_val} [{result_log["BC_Type"]} BC]')
-    plot_mass_vs_time(t_np, mass_pinn_history, save_path=f'figures/pinn_vanilla/Mass_Pinn_vanilla_Pe={pe_val}_{result_log["BC_Type"]}.png', title=f'Evolusi Massa PINN Vanilla (Pe={pe_val} [{result_log["BC_Type"]}BC]')
+    os.makedirs('figures/pinn_conservative/', exist_ok=True)
+    plot_solution_evolution(x_np.flatten(), t_eval, c_pred_evolution, save_path=f'figures/pinn_conservative/Evolution_Pinn_conservative_Pe={pe_val}_{result_log["BC_Type"]}.png', title=f'Evolusi Solusi PINN Conservative (Pe={pe_val} [{result_log["BC_Type"]} BC]')
+    plot_mass_vs_time(t_np, mass_pinn_history, save_path=f'figures/pinn_conservative/Mass_Pinn_conservative_Pe={pe_val}_{result_log["BC_Type"]}.png', title=f'Evolusi Massa PINN Conservative (Pe={pe_val} [{result_log["BC_Type"]}BC]')
 
     plt.figure(figsize=(10, 6))
     plt.plot(x_np, c_ref_final, label='CN (Referensi)', color='blue', linewidth=2.5)
     plt.plot(x_np, c_pred_final, label='PINN (Prediksi)', color='red', linestyle='--', linewidth=2.2)
     plt.xlabel('Posisi (x)')
     plt.ylabel('Konsentrasi (c)')
-    plt.title(f'CN vs PINN Vanilla at Pe={pe_val} (t={t_final} s) [{result_log["BC_Type"]}] BC]', fontsize=14, fontweight='bold')
+    plt.title(f'CN vs PINN Conservative at Pe={pe_val} (t={t_final} s) [{result_log["BC_Type"]}] BC]', fontsize=14, fontweight='bold')
     plt.legend()
     plt.grid(True, alpha=0.5)
-    plt.savefig(f'figures/pinn_vanilla/Comparison_Pinn_vanilla_Pe={pe_val}_{result_log["BC_Type"]}.png')
+    plt.savefig(f'figures/pinn_conservative/Comparison_Pinn_conservative_Pe={pe_val}_{result_log["BC_Type"]}.png')
     plt.show()
 
 if __name__ == '__main__':
-    PE_VALUE = 50.0
-    MODEL_FILE = f'models\PINN_Vanilla\PINN_VANILLA_Pe={PE_VALUE}_Neumann.pth'
+    PE_VALUE = 20.0
+    MODEL_FILE = f'models\PINN_Conservative\PINN_CONSERVATIVE_Pe={PE_VALUE}_Neumann.pth'
     REF_FILE = f'data/reference/reference_Neumann_Pe={PE_VALUE:.2f}.npz'
     if os.path.exists(REF_FILE):
         evaluate_and_log(MODEL_FILE, REF_FILE, PE_VALUE)

@@ -193,4 +193,5 @@ def train_pinn_conservative(model, data, params, epochs_adam = 1000, epochs_lbfg
 
 
     optimizer_lbfgs.step(closure)
+    
     return history

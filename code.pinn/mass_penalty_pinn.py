@@ -2,7 +2,7 @@ import torch
 import numpy as np
 
 # gaussian quadrature
-def gaussian_quadrature(n=50, L=1.0, device='cpu'):
+def gaussian_quadrature(n=21, L=1.0, device='cpu'):
     # titik dan bobot untuk integrasi numerik
     # titik standar di rentang [-1, 1]
     x_gl, w_gl = np.polynomial.legendre.leggauss(n)
@@ -37,7 +37,7 @@ def compute_mass_penalty(model, x_quad, w_quad, t_samples, M0):
 
     return loss_mass
 
-def lambda_mass(Pe):
+#def lambda_mass(Pe):
     # fungsi pembobotan untuk penalti massa berdasarkan Pe
     if Pe < 1:
         return 1.0  

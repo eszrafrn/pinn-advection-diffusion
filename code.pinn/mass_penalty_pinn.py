@@ -37,16 +37,12 @@ def compute_mass_penalty(model, x_quad, w_quad, t_samples, M0):
 
     return loss_mass
 
-#def lambda_mass(Pe):
-    # fungsi pembobotan untuk penalti massa berdasarkan Pe
-    if Pe < 1:
-        return 1.0  
-    elif Pe <= 10:
-        return 5.0   
-    elif Pe <= 20:
-        return 10.0  
+def lambda_mass(epoch):
+    # fungsi pembobotan untuk penalti massa berdasarkan epoch
+    if epoch <= 100:
+        return 10.0
     else:
-        return 50.0    
+        return 1.0   
 
 
     
